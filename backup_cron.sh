@@ -36,6 +36,7 @@ ARCHIVE_PLAIN="${ARCHIVE_DIR}/${BASENAME}.tar.gz"
 ARCHIVE_ENC="${ARCHIVE_DIR}/${BASENAME}.tar.gz.enc"
 KEY_FILE="${KEY_DIR}/${BASENAME}.key"
 LOG_FILE="${LOG_DIR}/${BASENAME}.log"
+CHECKSUM_FILE="${ARCHIVE_DIR}/${BASENAME}.sha256"
 
 log "=== Début de la sauvegarde : $BASENAME ==="
 
@@ -58,6 +59,12 @@ openssl enc -aes-256-cbc -salt -pbkdf2 -iter 100000 \
     -pass file:"$KEY_FILE"
 
 log "Archive chiffrée : $ARCHIVE_ENC ($(du -h "$ARCHIVE_ENC" | cut -f1))"
+
+# ---------- Calcul de l'empreinte SHA-256 ----------
+log "Calcul de l'empreinte SHA-256..."
+(cd "$ARCHIVE_DIR" && sha256sum "$ARCHIVE_ENC") > "$CHECKSUM_FILE"
+chmod 644 "$CHECKSUM_FILE"
+log "Empreinte générée : $CHECKSUM_FILE"
 
 # ---------- Suppression de l'archive en clair ----------
 rm -f "$ARCHIVE_PLAIN"
